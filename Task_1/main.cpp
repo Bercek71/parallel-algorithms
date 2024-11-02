@@ -1,76 +1,5 @@
 #include <iostream>
-#include <vector>
-#include <limits>
-#include <iomanip>
-#include <omp.h>
-
-class BranchAndBound {
-public:
-    BranchAndBound(const std::vector<int>& widths, const std::vector<std::vector<int>>& weights)
-        : widths(widths), weights(weights), n(widths.size()), bestCost(std::numeric_limits<int>::max()) {}
-
-    void solve() {
-        std::vector<int> arrangement(n);
-        for (int i = 0; i < n; ++i) {
-            arrangement[i] = i; // Inicializace uspořádání s indexy
-        }
-        branchAndBound(arrangement, 0);
-    }
-
-    void printBest() const {
-        std::cout << "\nNejlepší cena: " << bestCost << "\nNejlepší uspořádání: ";
-        for (auto i : bestArrangement) {
-            std::cout << i << " ";
-        }
-        std::cout << "\n";
-    }
-
-private:
-    std::vector<int> widths; // Šířky zařízení
-    std::vector<std::vector<int>> weights; // Matice váh
-    int n; // Počet zařízení
-    int bestCost; // Nejlepší cena
-    std::vector<int> bestArrangement; // Nejlepší uspořádání
-
-    // Vypočítat vzdálenost d(pi_i, pi_j)
-    int distance(int i, int j, const std::vector<int>& arrangement) {
-        int sum_widths = 0;
-        for (int k = i; k <= j; ++k) {
-            sum_widths += widths[arrangement[k]];
-        }
-        return (widths[arrangement[i]] + widths[arrangement[j]]) / 2 + sum_widths;
-    }
-
-    // Vypočítat cenu f_SRFLP(pi)
-    int calculateCost(const std::vector<int>& arrangement) {
-        int totalCost = 0;
-        for (size_t i = 0; i < n; ++i) {
-            for (int j = i + 1; j < n; ++j) {
-                totalCost += weights[arrangement[i]][arrangement[j]] * distance(i, j, arrangement);
-            }
-        }
-        return totalCost;
-    }
-
-    // Hlavní metoda pro Branch and Bound
-    void branchAndBound(std::vector<int>& arrangement, int depth) {
-        // Pokud dosáhneme hloubky n, vypočítáme cenu
-        if (depth == n) {
-            int currentCost = calculateCost(arrangement);
-            if (currentCost < bestCost) {
-                bestCost = currentCost;
-                bestArrangement = arrangement; // Uložení nejlepšího uspořádání
-            }
-        }
-
-        // Rekurzivní větvení
-        for (size_t i = depth; i < n; ++i) {
-            std::swap(arrangement[depth], arrangement[i]);
-            branchAndBound(arrangement, depth + 1);
-            std::swap(arrangement[depth], arrangement[i]); // Zpět
-        }
-    }
-};
+#include "BranchAndBound.h"
 
 // Hlavní funkce pro inicializaci dat a spuštění Branch and Bound
 int main() {
@@ -89,9 +18,42 @@ int main() {
         {22, 32, 19, 28, 16, 24, 24, 18, 24, 0}
     };
 
+    //Make widths2 and weights2 much harder to solve
+
+    std::vector<int> widths2 = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 4, 5, 6, 7, 8, 9, 10}; // Šířky zařízení
+    std::vector<std::vector<int>> weights2 = {
+        {0, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {30, 0, 21, 23, 26, 24, 27, 19, 11, 32, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {17, 21, 0, 24, 18, 23, 31, 36, 28, 19, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {11, 23, 24, 0, 19, 18, 33, 25, 20, 28, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {24, 26, 18, 19, 0, 15, 37, 27, 17, 16, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {25, 24, 23, 18, 15, 0, 27, 23, 29, 24, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {24, 27, 31, 33, 37, 27, 0, 27, 31, 24, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {17, 19, 36, 25, 27, 23, 27, 0, 14, 18, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {16 ,11, 28, 20, 17, 29, 31, 14, 0, 24, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {22, 32, 19, 28, 16, 24, 24, 18, 24, 0, 30, 17, 11, 24, 25, 24, 17, 16, 22, 30},
+        {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 0, 30, 30, 30, 30, 30, 30, 30, 30, 30},
+        {17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 30, 0, 30, 30, 30, 30, 30, 30, 30, 30},
+        {11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 30, 30, 0, 30, 30, 30, 30, 30, 30, 30},
+        {24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 30, 30, 30, 0, 30, 30, 30, 30, 30, 30},
+        {25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 30, 30, 30, 30, 0, 30, 30, 30, 30, 30},
+        {24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 30, 30, 30, 30, 30, 0, 30, 30, 30, 30},
+        {17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 30, 30, 30, 30, 30, 30, 0, 30, 30, 30},
+        {16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 30, 30, 30, 30, 30, 30, 30, 0, 30, 30},
+        {22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 30, 30, 30, 30, 30, 30, 30, 30, 0, 30},
+        {42, 42, 42, 42, 42, 42, 42, 42, 42, 42, 30, 30, 30, 30, 30, 30, 30, 30, 30, 0}};
+
+
+    int totalThreads = omp_get_max_threads();
+    std::cout << "Total threads: " << totalThreads << std::endl;
+
+    double start = omp_get_wtime();
     BranchAndBound solver(widths, weights);
     solver.solve();
+    double end = omp_get_wtime();
     solver.printBest();
+    //print time
+    std::cout << "Time: " << std::fixed << std::setprecision(6) << end - start << " s\n";
 
     return 0;
 }
