@@ -4,11 +4,19 @@
 
 #include "BranchAndBound.h"
 
+int BranchAndBound::factorial(int n) {
+    if(n == 0) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
     void BranchAndBound::solve() {
         std::vector<int> arrangement(n);
         for (int i = 0; i < n; ++i) {
             arrangement[i] = i; // Inicializace uspořádání s indexy
         }
+        totalNodes = factorial(n) * 2.71;
         branchAndBound(arrangement, 0, true);
     }
 
@@ -27,7 +35,6 @@
         {
                 bestCost = currentCost;
                 bestArrangement = arrangement; // Uložení nejlepšího uspořádání
-                count++;
         }
 
         }
@@ -53,9 +60,18 @@
 
     // Hlavní metoda pro Branch and Bound
     void BranchAndBound::branchAndBound(std::vector<int>& arrangement, int depth, bool parallel) {
+/*
+    #pragma omp atomic
+        processedNodes++;
 
+        // Print progress
+    if(processedNodes % 10000 == 0) {
+            printProgress(processedNodes);
+    }
+
+*/
         // Pokud dosáhneme hloubky n, vypočítáme cenu
-        if (depth == n) {
+        if (depth >= n) {
             int currentCost = calculateCost(arrangement);
             updateBest(currentCost, arrangement, depth); // Aktualizace nejlepšího řešení
             return;
@@ -81,7 +97,9 @@
     }
 
 void BranchAndBound::printProgress(int count) const {
-    //print progress like [100%] and change it on line
-    std::cout << "\r[" << count << "]";
-
+    int dynamicTotal = std::max(totalNodes , processedNodes);
+    if (dynamicTotal > 0) {
+        int progress = std::min(static_cast<int>((static_cast<double>(count) / dynamicTotal) * 100), 100);
+        std::cout << "\t\t \r[" << progress << "%]"<< std::flush;
     }
+}

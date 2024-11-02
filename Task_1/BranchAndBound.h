@@ -16,6 +16,8 @@ public:
     BranchAndBound(const std::vector<int>& widths, const std::vector<std::vector<int>>& weights)
         : widths(widths), weights(weights), n(widths.size()), bestCost(std::numeric_limits<int>::max()) {}
 
+    int factorial(int i);
+
     void solve();
 
     void printBest() const;
@@ -26,7 +28,8 @@ private:
     int n; // Počet zařízení
     int bestCost; // Nejlepší cena
     std::vector<int> bestArrangement; // Nejlepší uspořádání
-    int count;
+    int processedNodes;
+    int totalNodes;
 
     // Synchronizovaná metoda pro aktualizaci nejlepšího řešení
     void updateBest(int currentCost, const std::vector<int>& arrangement, int depth);
