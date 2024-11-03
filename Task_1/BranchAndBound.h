@@ -42,7 +42,6 @@ private:
     // Hlavní metoda pro Branch and Bound
     void branchAndBound(std::vector<int>& arrangement, int depth, bool parallel = false);
 
-    void printProgress(int depth) const;
 };
 
 

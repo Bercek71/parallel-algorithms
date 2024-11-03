@@ -95,11 +95,3 @@ int BranchAndBound::factorial(int n) {
 
         }
     }
-
-void BranchAndBound::printProgress(int count) const {
-    int dynamicTotal = std::max(totalNodes , processedNodes);
-    if (dynamicTotal > 0) {
-        int progress = std::min(static_cast<int>((static_cast<double>(count) / dynamicTotal) * 100), 100);
-        std::cout << "\t\t \r[" << progress << "%]"<< std::flush;
-    }
-}
